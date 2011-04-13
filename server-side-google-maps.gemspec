@@ -4,13 +4,13 @@ require "server-side-google-maps/version"
 
 Gem::Specification.new do |s|
   s.name        = "server-side-google-maps"
-  s.version     = Server::Side::Google::Maps::VERSION
+  s.version     = ServerSideGoogleMaps::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.authors     = ["Adam Hooper"]
+  s.email       = ["adam@adamhooper.com"]
+  s.homepage    = "http://github.com/adamh/server-side-google-maps"
+  s.summary     = %q{Performs calculations with Google Maps}
+  s.description = %q{Servers can use Google Maps, too. This library helps fetch and parse data through the Google Maps v3 API. Stick to the terms of usage, though, and don't use the data Google gives you on anything other than a Google map.}
 
   s.rubyforge_project = "server-side-google-maps"
 
