@@ -12,6 +12,9 @@ Gem::Specification.new do |s|
   s.summary     = %q{Performs calculations with Google Maps}
   s.description = %q{Servers can use Google Maps, too. This library helps fetch and parse data through the Google Maps v3 API. Stick to the terms of usage, though, and don't use the data Google gives you on anything other than a Google map.}
 
+  s.add_dependency('httparty')
+  s.add_dependency('nayutaya-googlemaps-polyline', '0.0.1')
+
   s.rubyforge_project = "server-side-google-maps"
 
   s.files         = `git ls-files`.split("\n")
