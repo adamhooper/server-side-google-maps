@@ -24,6 +24,23 @@ module ServerSideGoogleMaps
         Directions.should_receive(:get).with(:origin => '1', :destination => '2', :mode => :bicycling)
         Directions.new('1', '2', :mode => :bicycling)
       end
+
+      it('should not query Google with :direct and lat-lng string inputs') do
+        Directions.should_not_receive(:get)
+        Directions.new('45.5086700,-73.5536800', '45.4119000,-75.6984600', :mode => :direct)
+      end
+
+      it('should not query Google with :direct and lat-lng inputs') do
+        Directions.should_not_receive(:get)
+        Directions.new([45.5086700,-73.5536800], [45.4119000,-75.6984600], :mode => :direct)
+      end
+    end
+
+    context('with lat-lng string inputs and :mode => :direct') do
+      it('should calculate proper distance') do
+        directions = Directions.new('45.5086700,-73.5536800', '45.4119000,-75.6984600', :mode => :direct)
+        directions.distance.should == 167512
+      end
     end
 
     context('with a mocked return value') do

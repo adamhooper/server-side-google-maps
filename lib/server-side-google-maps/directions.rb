@@ -1,5 +1,7 @@
 module ServerSideGoogleMaps
   class Directions
+    LATLNG_STRING_REGEXP = /(-?\d+(\.?\d+)?),(-?\d+(\.?\d+)?)/
+
     def self.get(params)
       server = Server.new
       server.get('/maps/api/directions', {:sensor => false}.merge(params))
@@ -25,6 +27,7 @@ module ServerSideGoogleMaps
     def initialize(origin, destination, params = {})
       @origin = origin
       @destination = destination
+      params = params.dup
       find_shortcuts = params.delete(:find_shortcuts) || []
       raise ArgumentError.new(':find_shortcuts must be an Array') unless Array === find_shortcuts
       @direct = params[:mode] == :direct
@@ -33,16 +36,20 @@ module ServerSideGoogleMaps
       origin = origin.join(',') if Array === origin
       destination = destination.join(',') if Array === destination
 
-      @data = self.class.get(params.merge(:origin => origin, :destination => destination))
+      unless @direct && origin_point_without_server && destination_point_without_server
+        @data = self.class.get(params.merge(:origin => origin, :destination => destination))
+      end
 
-      find_shortcuts.each do |try_shortcut|
-        factor = try_shortcut[:factor]
-        mode = try_shortcut[:mode]
+      if !@direct
+        find_shortcuts.each do |try_shortcut|
+          factor = try_shortcut[:factor]
+          mode = try_shortcut[:mode]
 
-        other = Directions.new(origin, destination, params.merge(:mode => mode))
-        if other.distance.to_f / distance < factor
-          @points = other.points
-          @distance = other.distance
+          other = Directions.new(origin, destination, params.merge(:mode => mode))
+          if other.distance.to_f / distance < factor
+            @points = other.points
+            @distance = other.distance
+          end
         end
       end
     end
@@ -64,11 +71,11 @@ module ServerSideGoogleMaps
     end
 
     def origin_point
-      [ leg['start_location']['lat'], leg['start_location']['lng'] ]
+      @origin_point ||= origin_point_without_server || [ leg['start_location']['lat'], leg['start_location']['lng'] ]
     end
 
     def destination_point
-      [ leg['end_location']['lat'], leg['end_location']['lng'] ]
+      @destination_point ||= destination_point_without_server || [ leg['end_location']['lat'], leg['end_location']['lng'] ]
     end
 
     def status
@@ -84,6 +91,20 @@ module ServerSideGoogleMaps
     end
 
     private
+
+    def origin_point_without_server
+      calculate_point_without_server_or_nil(origin_input)
+    end
+
+    def destination_point_without_server
+      calculate_point_without_server_or_nil(destination_input)
+    end
+
+    def calculate_point_without_server_or_nil(input)
+      return input if Array === input
+      m = LATLNG_STRING_REGEXP.match(input)
+      return [ m[1].to_f, m[3].to_f ] if m
+    end
 
     def route
       @data['routes'].first
@@ -103,8 +124,8 @@ module ServerSideGoogleMaps
     end
 
     def calculate_points
+      return [ origin_point, destination_point ] if @direct
       points = points_and_levels.map { |lat,lng,level| [lat,lng] }
-      return [ points[0], points[-1] ] if @direct
       points
     end
 
