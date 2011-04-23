@@ -77,6 +77,22 @@ module ServerSideGoogleMaps
         distance = route.distance
         distance.should == 649742
       end
+
+      it('should not alter params') do
+        original_params = {
+          :mode => :driving,
+          :find_shortcuts => [{ :factor => 0.5, :mode => :direct }]
+        }
+        passed_params = {
+          :mode => :driving,
+          :find_shortcuts => [{ :factor => 0.5, :mode => :direct }]
+        }
+        route = Route.new(
+          ['Montreal,QC', 'Ottawa,ON', 'Toronto,ON'],
+          passed_params
+        )
+        passed_params.should == original_params
+      end
     end
   end
 end
