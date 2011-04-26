@@ -128,13 +128,30 @@ module ServerSideGoogleMaps
           parser = Parser.new(data, :json)
           parser.parse
         end
-
-        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
       end
 
       it('should calculate the distance by summing the parts') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON')
         directions.distance.should == 199901
+      end
+    end
+
+    context('when Google forgets the overview polyline') do
+      class Parser < HTTParty::Parser
+        public_class_method(:new)
+      end
+
+      before(:each) do
+        Directions.stub(:get) do
+          data = File.read(File.dirname(__FILE__) + '/files/directions-Montreal,QC-to-Ottawa,ON-without-overview-polyline.txt')
+          parser = Parser.new(data, :json)
+          parser.parse
+        end
+      end
+
+      it('should provide the start-point and end-point instead') do
+        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
+        directions.points.should == [[45.50867, -73.55368], [45.4119, -75.69846]]
       end
     end
   end

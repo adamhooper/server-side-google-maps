@@ -120,6 +120,7 @@ module ServerSideGoogleMaps
 
     def calculate_points_and_levels
       polyline = route['overview_polyline']
+      return [ origin_point + [0], destination_point + [0]] unless polyline && polyline['points'] && polyline['levels']
       ::GoogleMapsPolyline.decode_polyline(polyline['points'], polyline['levels'])
     end
 
