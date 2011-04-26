@@ -131,6 +131,9 @@ module ServerSideGoogleMaps
 
     def calculate_distance
       return GeoMath.latlng_distance(*points) if @direct
+      if !leg['distance']
+        return leg['steps'].collect{|s| s['distance']}.collect{|d| d ? d['value'].to_i : 0}.inject(0){|s,v| s += v}
+      end
       leg['distance']['value']
     end
   end

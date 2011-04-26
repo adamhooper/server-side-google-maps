@@ -54,8 +54,6 @@ module ServerSideGoogleMaps
           parser = Parser.new(data, :json)
           parser.parse
         end
-
-        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
       end
 
       it('should have origin_input and destination_input') do
@@ -116,6 +114,27 @@ module ServerSideGoogleMaps
 
       it('should correct the user if :find_shortcuts is not an Array') do
         lambda { Directions.new('Montreal,QC', 'Ottawa,ON', :find_shortcuts => { :factor => 0.5, :mode => :direct }) }.should(raise_error(ArgumentError))
+      end
+    end
+
+    context('when Google forgets the total distance') do
+      class Parser < HTTParty::Parser
+        public_class_method(:new)
+      end
+
+      before(:each) do
+        Directions.stub(:get) do
+          data = File.read(File.dirname(__FILE__) + '/files/directions-Montreal,QC-to-Ottawa,ON-without-distance.txt')
+          parser = Parser.new(data, :json)
+          parser.parse
+        end
+
+        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
+      end
+
+      it('should calculate the distance by summing the parts') do
+        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
+        directions.distance.should == 199901
       end
     end
   end
