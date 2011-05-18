@@ -90,6 +90,10 @@ module ServerSideGoogleMaps
       @distance ||= calculate_distance
     end
 
+    def estimated_distance
+      @estimated_distance ||= calculate_estimated_distance
+    end
+
     private
 
     def origin_point_without_server
@@ -131,11 +135,23 @@ module ServerSideGoogleMaps
     end
 
     def calculate_distance
-      return GeoMath.latlng_distance(*points) if @direct
+      return estimated_distance if @direct
       if !leg['distance']
         return leg['steps'].collect{|s| s['distance']}.collect{|d| d ? d['value'].to_i : 0}.inject(0){|s,v| s += v}
       end
       leg['distance']['value']
+    end
+
+    def calculate_estimated_distance
+      d = 0
+      last_point = points[0]
+
+      points[1..-1].each do |point|
+        d += GeoMath.latlng_distance(last_point, point)
+        last_point = point
+      end
+
+      d
     end
   end
 end

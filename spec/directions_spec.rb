@@ -94,6 +94,12 @@ module ServerSideGoogleMaps
         distance.should == 199901
       end
 
+      it('should supply an estimated_distance') do
+        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
+        distance = directions.estimated_distance
+        distance.should == 199127
+      end
+
       it('should suggest a straight line, with :direct') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON', :mode => :direct)
         directions.points.should == [[45.50867, -73.55368], [45.4119, -75.69846]]
