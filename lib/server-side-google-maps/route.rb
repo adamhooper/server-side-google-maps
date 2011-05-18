@@ -40,6 +40,10 @@ module ServerSideGoogleMaps
       @distance ||= @directionses.map{|d| d.distance}.inject(:+)
     end
 
+    def estimated_distance
+      @estimated_distance ||= @directionses.map{|d| d.estimated_distance}.inject(:+)
+    end
+
     private
 
     def calculate_points

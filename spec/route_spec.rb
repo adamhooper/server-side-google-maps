@@ -78,6 +78,12 @@ module ServerSideGoogleMaps
         distance.should == 649742
       end
 
+      it('should have the proper estimated_distance') do
+        route = Route.new(['Montreal,QC', 'Ottawa,ON', 'Toronto,ON'])
+        distance = route.estimated_distance
+        distance.should == 647730
+      end
+
       it('should not alter params') do
         original_params = {
           :mode => :driving,
