@@ -47,7 +47,7 @@ module ServerSideGoogleMaps
 
           other = Directions.new(origin, destination, params.merge(:mode => mode))
           if other.distance.to_f / distance < factor
-            @points = other.points
+            @path = other.path
             @distance = other.distance
           end
         end
@@ -71,30 +71,30 @@ module ServerSideGoogleMaps
     end
 
     def origin_point
-      @origin_point ||= origin_point_without_server || [ leg['start_location']['lat'], leg['start_location']['lng'] ]
+      @origin_point ||= origin_point_without_server || Point.new(leg['start_location']['lat'], leg['start_location']['lng'])
     end
 
     def destination_point
-      @destination_point ||= destination_point_without_server || [ leg['end_location']['lat'], leg['end_location']['lng'] ]
+      @destination_point ||= destination_point_without_server || Point.new(leg['end_location']['lat'], leg['end_location']['lng'])
     end
 
     def status
       @data['status']
     end
 
-    def points
-      @points ||= calculate_points
-    end
-
     def distance
       @distance ||= calculate_distance
     end
 
-    def estimated_distance
-      @estimated_distance ||= calculate_estimated_distance
+    def path
+      @path ||= Path.new(points)
     end
 
     private
+
+    def points # DEPRECATED
+      @points ||= calculate_points
+    end
 
     def origin_point_without_server
       calculate_point_without_server_or_nil(origin_input)
@@ -107,7 +107,7 @@ module ServerSideGoogleMaps
     def calculate_point_without_server_or_nil(input)
       return input if Array === input
       m = LATLNG_STRING_REGEXP.match(input)
-      return [ m[1].to_f, m[3].to_f ] if m
+      return Point.new(m[1].to_f, m[3].to_f) if m
     end
 
     def route
@@ -124,34 +124,25 @@ module ServerSideGoogleMaps
 
     def calculate_points_and_levels
       polyline = route['overview_polyline']
-      return [ origin_point + [0], destination_point + [0]] unless polyline && polyline['points'] && polyline['levels']
+      return [ [origin_point.latitude, origin_point.longitude, 0], [destination_point.latitude, destination_point.longitude, 0]] unless polyline && polyline['points'] && polyline['levels']
       ::GoogleMapsPolyline.decode_polyline(polyline['points'], polyline['levels'])
     end
 
     def calculate_points
       return [ origin_point, destination_point ] if @direct
-      points = points_and_levels.map { |lat,lng,level| [lat,lng] }
+      points = points_and_levels.map { |lat,lng,level| Point.new(lat, lng) }
       points
     end
 
     def calculate_distance
-      return estimated_distance if @direct
+      if @direct
+        path.calculate_distances unless path.points[0].distance_along_path
+        return path.points[-1].distance_along_path
+      end
       if !leg['distance']
         return leg['steps'].collect{|s| s['distance']}.collect{|d| d ? d['value'].to_i : 0}.inject(0){|s,v| s += v}
       end
       leg['distance']['value']
-    end
-
-    def calculate_estimated_distance
-      d = 0
-      last_point = points[0]
-
-      points[1..-1].each do |point|
-        d += GeoMath.latlng_distance(last_point, point)
-        last_point = point
-      end
-
-      d
     end
   end
 end

@@ -70,8 +70,8 @@ module ServerSideGoogleMaps
 
       it('should have origin_point and destination_point') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON')
-        directions.origin_point.should == [ 45.5086700, -73.5536800 ]
-        directions.destination_point.should == [ 45.4119000, -75.6984600 ]
+        directions.origin_point.should == Point.new(45.5086700, -73.5536800)
+        directions.destination_point.should == Point.new(45.4119000, -75.6984600)
       end
 
       it('should have an "OK" status') do
@@ -81,11 +81,11 @@ module ServerSideGoogleMaps
 
       it('should have the proper points') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON')
-        points = directions.points
+        points = directions.path.points
         points.length.should == 138
-        points[0].should == [45.50867, -73.55368]
-        points[1].should == [45.50623, -73.55569]
-        points[-1].should == [45.4119, -75.69846]
+        points[0].should == Point.new(45.50867, -73.55368)
+        points[1].should == Point.new(45.50623, -73.55569)
+        points[-1].should == Point.new(45.4119, -75.69846)
       end
 
       it('should have the proper distance') do
@@ -94,27 +94,21 @@ module ServerSideGoogleMaps
         distance.should == 199901
       end
 
-      it('should supply an estimated_distance') do
-        directions = Directions.new('Montreal,QC', 'Ottawa,ON')
-        distance = directions.estimated_distance
-        distance.should == 199127
-      end
-
       it('should suggest a straight line, with :direct') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON', :mode => :direct)
-        directions.points.should == [[45.50867, -73.55368], [45.4119, -75.69846]]
+        directions.path.points.should == [Point.new(45.50867, -73.55368), Point.new(45.4119, -75.69846)]
         directions.distance.should == 167512
       end
 
       it('should suggest normal route if :find_shortcuts shortcuts are not short enough') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON', :find_shortcuts => [{ :factor => 0.5, :mode => :direct }])
-        directions.points.length.should > 2
+        directions.path.points.length.should > 2
         directions.distance.should == 199901
       end
 
       it('should suggest a shortcut if :find_shortcuts finds a shortcut') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON', :find_shortcuts => [{ :factor => 0.95, :mode => :direct }])
-        directions.points.length.should == 2
+        directions.path.points.length.should == 2
         directions.distance.should == 167512
       end
 
@@ -157,7 +151,7 @@ module ServerSideGoogleMaps
 
       it('should provide the start-point and end-point instead') do
         directions = Directions.new('Montreal,QC', 'Ottawa,ON')
-        directions.points.should == [[45.50867, -73.55368], [45.4119, -75.69846]]
+        directions.path.points.should == [Point.new(45.50867, -73.55368), Point.new(45.4119, -75.69846)]
       end
     end
   end

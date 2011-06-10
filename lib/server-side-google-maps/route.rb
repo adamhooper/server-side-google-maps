@@ -32,22 +32,22 @@ module ServerSideGoogleMaps
       @directionses.last.destination_point
     end
 
-    def points
-      @points ||= calculate_points
+    def path
+      Path.new(points)
     end
 
     def distance
       @distance ||= @directionses.map{|d| d.distance}.inject(:+)
     end
 
-    def estimated_distance
-      @estimated_distance ||= @directionses.map{|d| d.estimated_distance}.inject(:+)
-    end
-
     private
 
+    def points # DEPRECATED
+      @points ||= calculate_points
+    end
+
     def calculate_points
-      pointses = @directionses.map { |d| d.points }
+      pointses = @directionses.map { |d| d.path.points }
 
       first = pointses.shift
 

@@ -11,25 +11,25 @@ To install:
 
 Then, to use within Ruby:
 
-    directions = Directions.new('Montreal, QC', 'Ottawa, ON', :mode => :driving)
+    route = ServerSideGoogleMaps::Route.new(['Montreal, QC', 'Ottawa, ON'], :mode => :driving)
     # Origin and destination accept [lat,lon] coordinates as well as strings
     # :mode => :driving is the default. Others are :bicycling and :walking
 
-    directions.status              # 'OK'
-    directions.origin_address      # 'Montreal, QC, Canada'
-    directions.origin_point        # [ 45.5086700, -73.5536800 ]
-    directions.destination_address # 'Ottawa, ON, Canada'
-    directions.destination_point   # [ 45.4119000, -75.6984600 ]
-    directions.points              # Array of [lat,lon] coordinates of route
-    directions.distance            # 199901 (metres)
-
-    route = Route.new(['Montreal, QC', 'Ottawa, ON', 'Toronto, ON'], :mode => :bicycling)
-    # All the same methods apply to route as to directions
+    route.status              # 'OK'
+    route.origin_address      # 'Montreal, QC, Canada'
+    route.origin_point        # [ 45.5086700, -73.5536800 ]
+    route.destination_address # 'Ottawa, ON, Canada'
+    route.destination_point   # [ 45.4119000, -75.6984600 ]
+    route.path.points         # Array of Point coordinates of route
+    route.points[0].latitude  # .latitude, .longitude, .distance_to_here
+    route.distance            # 199901 (metres)
 
     # We can also find elevations along a path
-    path = Path.new([ [ 45.5086700, -73.5536800 ], [ 45.4119000, -75.6984600 ] ]) # a straight line
-    path.elevations(20) # Array of equidistant altitudes, in metres, along the path
-    # Paths may only be up to around 230 points long, to comply with Google's URL length limit.
+    path = route.path
+    path.elevations(20) # Array of equidistant Points, each with an elevation
+    # Paths used for elevation may only be up to around 230 points long,
+    # to comply with Google's URL length limit. That's not hard to achieve:
+    simple_path = path.interpolate(230) # will create a new Path by interpolating
 
 One final `:mode` is `:direct`, which calculates `points` and estimates
 `distance` without querying Google. To ensure Google isn't queried, input
