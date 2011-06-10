@@ -116,5 +116,61 @@ module ServerSideGoogleMaps
         interpolated[4].elevation.should == 50
       end
     end
+
+    describe('#simplify') do
+      it('should remove duplicate points') do
+        p1 = Point.new(1.0, 2.0)
+        p2 = Point.new(7.0, 2.0)
+        p2_2 = Point.new(7.0, 2.0)
+        p3 = Point.new(7.0, 1.0)
+
+        path = Path.new([p1, p2, p2_2, p3])
+        simplified = path.simplify(0.00001)
+        simplified.points.length.should == 3
+        simplified.points[0].should == p1
+        simplified.points[1].should == p2
+        simplified.points[2].should == p3
+      end
+
+      it('should remove useless points') do
+        p1 = Point.new(1.0, 2.0)
+        p2 = Point.new(6.0, 1.23)
+        p3 = Point.new(7.0, 1.0)
+
+        path = Path.new([p1, p2, p3])
+        simplified = path.simplify(0.005)
+        simplified.points.length.should == 2
+        simplified.points[0].should == p1
+        simplified.points[1].should == p3
+      end
+
+      it('should retain useful points') do
+        p1 = Point.new(1.0, 2.0)
+        p2 = Point.new(6.0, 1.23)
+        p3 = Point.new(7.0, 1.0)
+
+        path = Path.new([p1, p2, p3])
+        simplified = path.simplify(0.0005)
+        simplified.points.length.should == 3
+        simplified.points[0].should == p1
+        simplified.points[1].should == p2
+      end
+
+      it('should retain :distance_along_path, :elevation, :object') do
+        p1 = Point.new(1.0, 2.0, :distance_along_path => 0, :elevation => 0, :object => 0)
+        p2 = Point.new(6.0, 1.23, :distance_along_path => 1, :elevation => 1, :object => 1)
+        p3 = Point.new(7.0, 1.0, :distance_along_path => 2, :elevation => 2, :object => 2)
+
+        path = Path.new([p1, p2, p3])
+        simplified = path.simplify(0.005)
+        simplified.points.length.should == 2
+        simplified.points[0].object.should == p1.object
+        simplified.points[0].distance_along_path.should == p1.distance_along_path
+        simplified.points[0].elevation.should == p1.elevation
+        simplified.points[1].object.should == p3.object
+        simplified.points[1].distance_along_path.should == p3.distance_along_path
+        simplified.points[1].elevation.should == p3.elevation
+      end
+    end
   end
 end

@@ -77,7 +77,36 @@ module ServerSideGoogleMaps
       ret << create_interpolated_point(points[-1], points[-1], 0.0, :distance_along_path => points[-1].distance_along_path)
     end
 
+    def simplify(latlng_error2)
+      simplified_points = douglas_peucker_step(points, latlng_error2)
+      Path.new(simplified_points)
+    end
+
     private
+
+    def douglas_peucker_step(points, latlng_error2)
+      simple_points = [ points.first, points.last ]
+      max_i = 0
+      max_d = 0
+
+      points.each_with_index do |point, i|
+        next if i == 0 || i == points.length - 1
+        d = point.latlng_distance_squared_from_segment(points.first, points.last)
+        if d > max_d
+          max_d = d
+          max_i = i
+        end
+      end
+
+      if max_d > latlng_error2
+        simple1 = douglas_peucker_step(points[0..max_i], latlng_error2)
+        simple2 = douglas_peucker_step(points[max_i..-1], latlng_error2)
+        simple1.pop
+        return simple1.concat(simple2)
+      else
+        return simple_points
+      end
+    end
 
     def create_interpolated_point(point_before, point_after, fraction_after, options = {})
       fraction_before = 1.0 - fraction_after

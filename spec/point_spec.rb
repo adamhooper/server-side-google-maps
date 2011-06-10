@@ -39,6 +39,29 @@ module ServerSideGoogleMaps
       end
     end
 
+    describe('#latlng_distance_squared_from_segment') do
+      it('should catch when point is outside segment edges') do
+        # p1 ------------*---------
+        # p2 --*------------------- <- this point is farther than it'd be if the
+        # p3 -------------------*--    line segment were an infinite line
+        p1 = Point.new(1.0, 7.0)
+        p2 = Point.new(-1.0, 9.1)
+        p3 = Point.new(7.0, 1.0)
+
+        distance2 = p2.latlng_distance_squared_from_segment(p1, p3)
+        distance2.should == p2.latlng_distance_squared(p1)
+      end
+
+      it('should work when segment is a singularity') do
+        p1 = Point.new(1.0, 7.0)
+        p2 = Point.new(-1.0, 9.1)
+        p3 = Point.new(1.0, 7.0)
+
+        distance2 = p2.latlng_distance_squared_from_segment(p1, p3)
+        distance2.should == p2.latlng_distance_squared(p1)
+      end
+    end
+
     describe('#distance') do
       it('should calculate the distance') do
         point1 = Point.new(1.0, 4.0)

@@ -45,5 +45,32 @@ module ServerSideGoogleMaps
       longitude_difference = longitude - other.longitude
       latitude_difference * latitude_difference + longitude_difference * longitude_difference
     end
+
+    def latlng_distance_squared_from_segment(p1, p2)
+      vx = p1.latitude - latitude
+      vy = p1.longitude - longitude
+
+      return vx*vx + vy*vy if p1 == p2
+
+      ux = p2.latitude - p1.latitude
+      uy = p2.longitude - p1.longitude
+      length2 = ux*ux + uy*uy
+
+      det = (-vx*ux) + (-vy*uy)
+
+      if det < 0 || det > length2
+        # We're outside the line segment
+        wx = p2.latitude - latitude
+        wy = p2.longitude - longitude
+
+        d1 = vx*vx + vy*vy
+        d2 = wx*wx + wy*wy
+        return d1 < d2 ? d1 : d2
+      end
+
+      det = ux*vy - uy*vx
+
+      return det * det / length2
+    end
   end
 end
