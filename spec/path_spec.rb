@@ -105,6 +105,16 @@ module ServerSideGoogleMaps
         interpolated[6].distance_along_path.should == 666039
         interpolated[7].should == p3
       end
+
+      it('should interpolate elevations') do
+        p1 = Point.new(1.0, 1.0, :elevation => 10)
+        p2 = Point.new(2.0, 2.0, :elevation => 50)
+        path = Path.new([p1, p2])
+        interpolated = path.interpolate(5)
+        interpolated[0].elevation.should == 10
+        interpolated[1].elevation.should == 20
+        interpolated[4].elevation.should == 50
+      end
     end
   end
 end

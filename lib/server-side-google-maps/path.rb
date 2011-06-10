@@ -55,11 +55,7 @@ module ServerSideGoogleMaps
       distance_step = 1.0 * total_distance / (n - 1)
 
       ret = []
-      ret << Point.new(
-        points[0].latitude,
-        points[0].longitude,
-        :distance_along_path => points[0].distance_along_path
-      )
+      ret << create_interpolated_point(points[0], points[0], 0.0, :distance_along_path => points[0].distance_along_path)
 
       j = 0
       current_distance = points[0].distance_along_path
@@ -74,23 +70,28 @@ module ServerSideGoogleMaps
         point_segment_length = point_after.distance_along_path - point_before.distance_along_path
 
         fraction_after = (1.0 * current_distance - point_before.distance_along_path) / point_segment_length
-        fraction_before = 1.0 - fraction_after
 
-        ret << Point.new(
-          fraction_before * point_before.latitude + fraction_after * point_after.latitude,
-          fraction_before * point_before.longitude + fraction_after * point_after.longitude,
-          :distance_along_path => current_distance.round
-        )
+        ret << create_interpolated_point(point_before, point_after, fraction_after, :distance_along_path => current_distance.to_i)
       end
 
-      ret << Point.new(
-        points[-1].latitude,
-        points[-1].longitude,
-        :distance_along_path => points[-1].distance_along_path
-      )
+      ret << create_interpolated_point(points[-1], points[-1], 0.0, :distance_along_path => points[-1].distance_along_path)
     end
 
     private
+
+    def create_interpolated_point(point_before, point_after, fraction_after, options = {})
+      fraction_before = 1.0 - fraction_after
+
+      if point_before.elevation && point_after.elevation && options[:elevation].nil?
+        options = options.merge(:elevation => fraction_before * point_before.elevation + fraction_after * point_after.elevation)
+      end
+
+      Point.new(
+        fraction_before * point_before.latitude + fraction_after * point_after.latitude,
+        fraction_before * point_before.longitude + fraction_after * point_after.longitude,
+        options
+      )
+    end
 
     def encoded_path
       @encoded_path ||= ::GoogleMapsPolyline::Encoder.new(StringIO.new).encode_points(points_1e5).string
