@@ -20,11 +20,17 @@ module ServerSideGoogleMaps
     # Returns a new Path with n equidistant Points along this Path, complete with .elevation
     def elevations(n)
       results = self.class.get_elevations(:path => "enc:#{encoded_path}", :samples => n)
+
+      i = -1
+      total_distance = points.last.distance_along_path
+
       points = results['results'].collect do |r|
+        i += 1
         Point.new(
           r['location']['lat'].to_f,
           r['location']['lng'].to_f,
-          :elevation => r['elevation'].to_f
+          :elevation => r['elevation'].to_f,
+          :distance_along_path => total_distance && (total_distance.to_f * i / (n - 1)).to_i
         )
       end
       Path.new(points)

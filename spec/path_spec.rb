@@ -54,6 +54,17 @@ module ServerSideGoogleMaps
           elevations.points[0].longitude.should == -73.55368
           elevations.points[19].elevation.should == 89.6621323
         end
+
+        it('should populate #distance_along_path') do
+          pt1 = Point.new(45.50867, -73.55368)
+          pt2 = Point.new(43.65235, -79.38240)
+          path = Path.new([pt1, pt2])
+          path.calculate_distances
+          elevations = path.elevations(20)
+          elevations.points[0].distance_along_path.should == 0
+          elevations.points[19].distance_along_path.should == path.points.last.distance_along_path
+          elevations.points[9].distance_along_path.should == (path.points.last.distance_along_path * 9.0 / 19).to_i
+        end
       end
     end
 
