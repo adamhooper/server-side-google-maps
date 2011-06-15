@@ -84,12 +84,12 @@ module ServerSideGoogleMaps
         p3 = Point.new(7.0, 1.0)
         path = Path.new([p1, p2, p3])
         interpolated = path.interpolate(8)
-        interpolated.length.should == 8
-        interpolated[0].should == p1
-        interpolated[6].latitude.to_s.should == '6.9936056564358' # too many decimals...
-        interpolated[6].longitude.should == 2.0
-        interpolated[6].distance_along_path.should == 666039
-        interpolated[7].should == p3
+        interpolated.points.length.should == 8
+        interpolated.points[0].should == p1
+        interpolated.points[6].latitude.to_s.should == '6.9936056564358' # too many decimals...
+        interpolated.points[6].longitude.should == 2.0
+        interpolated.points[6].distance_along_path.should == 666039
+        interpolated.points[7].should == p3
       end
 
       it('should work okay when duplicate Points are on the Path') do
@@ -99,11 +99,11 @@ module ServerSideGoogleMaps
         p3 = Point.new(7.0, 1.0)
         path = Path.new([p1, p2, p2_2, p3])
         interpolated = path.interpolate(8)
-        interpolated[0].should == p1
-        interpolated[6].latitude.to_s.should == '6.9936056564358' # too many decimals...
-        interpolated[6].longitude.should == 2.0
-        interpolated[6].distance_along_path.should == 666039
-        interpolated[7].should == p3
+        interpolated.points[0].should == p1
+        interpolated.points[6].latitude.to_s.should == '6.9936056564358' # too many decimals...
+        interpolated.points[6].longitude.should == 2.0
+        interpolated.points[6].distance_along_path.should == 666039
+        interpolated.points[7].should == p3
       end
 
       it('should interpolate elevations') do
@@ -111,9 +111,9 @@ module ServerSideGoogleMaps
         p2 = Point.new(2.0, 2.0, :elevation => 50)
         path = Path.new([p1, p2])
         interpolated = path.interpolate(5)
-        interpolated[0].elevation.should == 10
-        interpolated[1].elevation.should == 20
-        interpolated[4].elevation.should == 50
+        interpolated.points[0].elevation.should == 10
+        interpolated.points[1].elevation.should == 20
+        interpolated.points[4].elevation.should == 50
       end
     end
 

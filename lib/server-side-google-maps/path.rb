@@ -75,6 +75,8 @@ module ServerSideGoogleMaps
       end
 
       ret << create_interpolated_point(points[-1], points[-1], 0.0, :distance_along_path => points[-1].distance_along_path)
+
+      Path.new(ret)
     end
 
     def simplify(latlng_error2)
