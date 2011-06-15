@@ -69,5 +69,24 @@ module ServerSideGoogleMaps
         point1.distance(point2).should == 248412
       end
     end
+
+    describe('#==') do
+      it('should work with same latitude/longitudes') do
+        p1 = Point.new(1, 2)
+        p2 = Point.new(1, 2)
+        (p1 == p2).should == true
+      end
+
+      it('should work with different latitudes/longitudes') do
+        p1 = Point.new(1, 2)
+        p2 = Point.new(1, 4)
+        (p1 == p2).should == false
+      end
+
+      it('should work with a non-Point') do
+        p1 = Point.new(1, 2)
+        (p1 == true).should == false
+      end
+    end
   end
 end

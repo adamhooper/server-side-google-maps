@@ -15,6 +15,7 @@ module ServerSideGoogleMaps
     end
 
     def ==(other)
+      return false unless Point === other
       latitude == other.latitude && longitude == other.longitude && object == other.object
     end
 
