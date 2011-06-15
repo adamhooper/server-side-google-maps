@@ -85,13 +85,13 @@ module ServerSideGoogleMaps
     private
 
     def douglas_peucker_step(points, latlng_error2)
-      simple_points = [ points.first, points.last ]
+      segment = Segment.new(points.first, points.last)
       max_i = 0
       max_d = 0
 
       points.each_with_index do |point, i|
         next if i == 0 || i == points.length - 1
-        d = point.latlng_distance_squared_from_segment(points.first, points.last)
+        d = point.latlng_distance_squared_from_segment(segment)
         if d > max_d
           max_d = d
           max_i = i
@@ -104,7 +104,7 @@ module ServerSideGoogleMaps
         simple1.pop
         return simple1.concat(simple2)
       else
-        return simple_points
+        return segment.to_a
       end
     end
 

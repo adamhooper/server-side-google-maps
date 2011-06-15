@@ -46,19 +46,22 @@ module ServerSideGoogleMaps
       latitude_difference * latitude_difference + longitude_difference * longitude_difference
     end
 
-    def latlng_distance_squared_from_segment(p1, p2)
+    def latlng_distance_squared_from_segment(segment)
+      p1 = segment.first
+
       vx = p1.latitude - latitude
       vy = p1.longitude - longitude
 
-      return vx*vx + vy*vy if p1 == p2
+      return vx*vx + vy*vy if segment.length2 == 0
 
-      ux = p2.latitude - p1.latitude
-      uy = p2.longitude - p1.longitude
-      length2 = ux*ux + uy*uy
+      ux = segment.dlat
+      uy = segment.dlon
 
       det = (-vx*ux) + (-vy*uy)
 
+      length2 = segment.length2
       if det < 0 || det > length2
+        p2 = segment.last
         # We're outside the line segment
         wx = p2.latitude - latitude
         wy = p2.longitude - longitude

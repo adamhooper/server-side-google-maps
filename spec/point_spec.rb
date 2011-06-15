@@ -48,7 +48,7 @@ module ServerSideGoogleMaps
         p2 = Point.new(-1.0, 9.1)
         p3 = Point.new(7.0, 1.0)
 
-        distance2 = p2.latlng_distance_squared_from_segment(p1, p3)
+        distance2 = p2.latlng_distance_squared_from_segment(Segment.new(p1, p3))
         distance2.should == p2.latlng_distance_squared(p1)
       end
 
@@ -57,7 +57,7 @@ module ServerSideGoogleMaps
         p2 = Point.new(-1.0, 9.1)
         p3 = Point.new(1.0, 7.0)
 
-        distance2 = p2.latlng_distance_squared_from_segment(p1, p3)
+        distance2 = p2.latlng_distance_squared_from_segment(Segment.new(p1, p3))
         distance2.should == p2.latlng_distance_squared(p1)
       end
     end
